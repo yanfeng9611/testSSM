@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="club.yanfeng.dao.UserDao">
+    <select id="queryUser" resultType="club.yanfeng.entity.User">
+		SELECT id,username, password
+		FROM user
+		WHERE username=#{username}
+		AND password=#{password};
+	</select>
+
+	<select id="queryUserIndex" resultType="club.yanfeng.entity.UserIndex">
+		SELECT  row_number() over (order by bookcase.caseName DESC ) as idx,book.id as bookId,book.bookName,book.author,book.publish,bookcase.caseName,book.publicationTime, pages, price, availableQuantity
+		FROM book, bookcase
+		where book.bookcaseId = bookcase.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="queryUserHistory" resultType="club.yanfeng.entity.UserHistory">
+		SELECT  row_number() over (order by borrowTime DESC) as idx, borrow.id as borrowId, book.id as bookId, book.bookName,book.author,book.publish,bookcase.caseName,borrow.borrowtime,borrow.approvalTime,borrow.returntime,borrowstate.state
+		FROM book,borrow,bookcase,borrowstate
+		where borrow.userId = #{userId} and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="getHistoryPages" resultType="java.lang.Integer">
+		select ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  SELECT  borrow.id as borrowId
+				FROM book,borrow,bookcase,borrowstate
+				where borrow.userId = #{userId} and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id) a
+
+	</select>
+
+	<select id="queryUserApproval" resultType="club.yanfeng.entity.UserHistory">
+		SELECT  row_number() over (order by borrowTime DESC) as idx, borrow.id as borrowId, book.id as bookId,book.bookName,book.author,book.publish,bookcase.caseName,borrow.borrowtime,borrow.approvalTime,borrow.returntime,borrowstate.state
+		FROM book,borrow,bookcase,borrowstate
+		where borrow.userId = #{userId} and borrow.stateId = 1 and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id
+		limit #{currentPage}, #{dataPrePage}
+
+	</select>
+
+	<select id="getApprovalPages" resultType="java.lang.Integer">
+		select ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  SELECT borrow.id as borrowId
+				FROM book,borrow,bookcase,borrowstate
+				where borrow.userId = #{userId} and borrow.stateId = 1 and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id) a
+	</select>
+
+	<select id="queryUserReading" resultType="club.yanfeng.entity.UserHistory">
+		SELECT  row_number() over (order by borrowTime DESC) as idx, borrow.id as borrowId, book.id as bookId,book.bookName,book.author,book.publish,bookcase.caseName,borrow.borrowtime,borrow.approvalTime,borrow.returntime,borrowstate.state
+		FROM book,borrow,bookcase,borrowstate
+		where borrow.userId = #{userId} and borrow.stateId = 2 and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="getReadingPages" resultType="java.lang.Integer">
+		select ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  SELECT borrow.id as borrowId
+				FROM book,borrow,bookcase,borrowstate
+				where borrow.userId = #{userId} and borrow.stateId = 2 and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id) a
+	</select>
+
+	<select id="queryUserAccomplish" resultType="club.yanfeng.entity.UserHistory">
+		SELECT  row_number() over (order by borrowTime DESC) as idx, borrow.id as borrowId, book.id as bookId, book.bookName,book.author,book.publish,bookcase.caseName,borrow.borrowtime,borrow.approvalTime,borrow.returntime,borrowstate.state
+		FROM book,borrow,bookcase,borrowstate
+		where borrow.userId = #{userId} and (borrow.stateId = 3 or borrow.stateId = 4 or borrow.stateId = 5 ) and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="getAccomplishPages" resultType="java.lang.Integer">
+		select ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  SELECT borrow.id as borrowId
+				FROM book,borrow,bookcase,borrowstate
+				where borrow.userId = #{userId} and (borrow.stateId = 3 or borrow.stateId = 4 or borrow.stateId = 5 ) and borrow.bookId = book.id and book.bookcaseId = bookcase.id and borrow.stateId = borrowstate.id) a
+	</select>
+
+</mapper>

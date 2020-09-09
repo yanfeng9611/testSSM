@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="club.yanfeng.dao.UpdateDao">
+    <update id="repealOperate" >
+		update borrow
+		set stateId = 5, returnTime = #{returnTime}
+		where id = #{borrowId};
+	</update>
+
+	<insert id="borrowOperate" >
+		insert into borrow (
+			bookId, userId, borrowTime, stateId)
+		values (
+			#{bookId}, #{userId}, #{borrowTime}, 1
+		)
+	</insert>
+
+	<update id="reduceBookAvailableNum" >
+		update book
+		set availableQuantity = availableQuantity - 1
+		where id = #{bookId}
+	</update>
+
+	<update id="addBookAvailableNum" >
+		update book
+		set availableQuantity = availableQuantity + 1
+		where id = #{bookId}
+	</update>
+
+	<update id="restoreOperate" >
+		update borrow
+		set stateId = 4, returnTime = #{returnTime}
+		where id = #{borrowId};
+	</update>
+
+</mapper>

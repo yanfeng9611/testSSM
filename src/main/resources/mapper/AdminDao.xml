@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="club.yanfeng.dao.AdminDao">
+    <select id="queryAdmin" resultType="club.yanfeng.entity.Admin">
+		SELECT id,username, password
+		FROM admin
+		WHERE username=#{username}
+		AND password=#{password};
+	</select>
+
+	<select id="queryAdminIndex" resultType="club.yanfeng.entity.AdminIndex">
+		SELECT  row_number() over (order by bookcase.caseName DESC ) as idx, book.bookName,book.author,book.publish,bookcase.caseName,book.publicationTime, pages, price, availableQuantity, totalQuantity
+		FROM book, bookcase
+		where book.bookcaseId = bookcase.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="queryAdminHistory" resultType="club.yanfeng.entity.AdminHistory">
+		SELECT  row_number() over (order by borrow.approvalTime DESC ) as idx, borrow.id as borrowId, book.bookName,book.author,book.publish,bookcase.caseName, user.username , borrow.borrowTime, borrow.approvalTime, borrow.returnTime, borrowstate.state
+		FROM book,bookcase, user, borrow, borrowstate
+		where  borrow.adminId=#{userId} and borrow.bookId  = book.id and borrow.userId = user.id and borrow.stateId = borrowstate.id  and book.bookcaseId = bookcase.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="getHistoryPages" resultType="java.lang.Integer">
+		SELECT ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  select borrow.id as borrowId
+				FROM book,bookcase, user, borrow, borrowstate
+				where  borrow.adminId=#{userId} and borrow.bookId  = book.id and borrow.userId = user.id and borrow.stateId = borrowstate.id  and book.bookcaseId = bookcase.id) a
+	</select>
+
+	<select id="queryApply" resultType="club.yanfeng.entity.AdminHistory">
+		SELECT  row_number() over (order by borrow.approvalTime DESC ) as idx, borrow.id as borrowId, book.bookName,book.author,book.publish,bookcase.caseName, user.username , borrow.borrowTime
+		FROM book, bookcase, user, borrow
+		where  borrow.stateId = 1 and borrow.bookId  = book.id and borrow.userId = user.id  and book.bookcaseId = bookcase.id
+		limit #{currentPage}, #{dataPrePage}
+	</select>
+
+	<select id="getApplyPages" resultType="java.lang.Integer">
+		SELECT ceil(count(a.borrowId) / #{dataPrePage}) as pages
+		from (  SELECT borrow.id as borrowId
+				FROM book, bookcase , user , borrow
+				where  borrow.stateId = 1 and borrow.bookId  = book.id and borrow.userId = user.id  and book.bookcaseId = bookcase.id ) a
+	</select>
+
+	<update id="queryApproval">
+		update borrow
+		set stateId = 2, approvalTime = #{approvalTime}, adminId = #{adminId}
+		where id = #{borrowId};
+	</update>
+
+	<update id="queryRefuse">
+		update borrow
+		set stateId = 3, approvalTime = #{approvalTime}, adminId = #{adminId}
+		where id = #{borrowId};
+	</update>
+
+</mapper>
